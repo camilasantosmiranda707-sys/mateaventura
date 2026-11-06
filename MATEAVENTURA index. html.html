@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mateaventura - Centro Alto </title>
+<style>
+:root{--p:#5b6ef5;--p2:#7c5cff;--y:#ffd93d;--g:#6bcf7f;--r:#ff6b6b;--bg:#f6f7ff}
+*{box-sizing:border-box;font-family:'Segoe UI',system-ui}
+body{margin:0;background:var(--bg);color:#222}
+header{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;padding:18px;text-align:center;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:28px}
+.container{max-width:900px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:18px;margin:14px 0}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--p);color:#fff}.btn-ghost{background:#eef0ff;color:var(--p)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.topic{cursor:pointer;transition:.2s}.topic:hover{transform:translateY(-3px)}
+.icon{font-size:36px}.badge{display:inline-block;background:var(--y);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.progress-bar{height:12px;background:#e9e9ff;border-radius:20px;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--g),#2ecc71);width:0%;transition:1s}
+.question{font-size:20px;font-weight:700;margin:10px 0}
+.img-box{width:100%;max-width:360px;height:150px;margin:10px auto;background:linear-gradient(135deg,#eef0ff,#f6f7ff);border:2px dashed #aab0ff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:80px}
+.options{display:grid;gap:10px;margin:12px 0}
+.opt{padding:12px;border:2px solid #eee;border-radius:12px;cursor:pointer;text-align:left;background:#fafaff;font-size:16px}
+.opt.correct{border-color:var(--g);background:#eaffef}.opt.wrong{border-color:var(--r);background:#ffeaea}
+.feedback{padding:12px;border-radius:12px;margin:10px 0;display:none}.feedback.ok{background:#eaffef;color:#1a7a33}.feedback.bad{background:#ffeaea;color:#a33}
+.score{font-size:18px;font-weight:800}.hidden{display:none}
+.input-name{width:100%;padding:12px;border:2px solid #e5e7ff;border-radius:12px;font-size:16px}
+.footer{text-align:center;padding:20px;color:#888;font-size:12px}
+.chart-bar{display:flex;align-items:end;gap:8px;height:120px;margin:10px 0}.chart-col{flex:1;border-radius:8px 8px 0 0;display:flex;justify-content:center;align-items:end;color:#fff;font-weight:700;padding-bottom:4px}
+</style>
+</head>
+<body>
+<header><h1>🌟 Mateaventura 🌟</h1><p>Centro Alto - 3ro Primaria - Offline</p></header>
+<div class="container">
+<div id="view-login" class="card"><h2>¡Bienvenido! 👋</h2><p>Escribe tu nombre:</p><input id="inputNombre" class="input-name" placeholder="Ej: Camila..."><div style="margin-top:12px;display:flex;gap:10px"><button class="btn btn-primary" onclick="guardarNombre()">Entrar 🔊</button><button class="btn btn-ghost" onclick="skipLogin()">Probar</button></div><p style="font-size:12px;color:#888">Kay musuq yachay - Guarda tu avance offline.</p></div>
+<div id="view-menu" class="hidden"><div class="card" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><h2 style="margin:0">Hola, <span id="spanNombre">Explorador</span>! 🚀</h2><div class="progress-bar" style="margin-top:8px;width:250px"><div id="progressFill" class="progress-fill"></div></div><small id="progressText">Progreso: 0%</small></div><div style="text-align:right"><div class="score">⭐ <span id="totalScore">0</span></div><button class="btn btn-ghost" onclick="reiniciarProgreso()">Reiniciar</button></div></div><div class="grid"><div class="card topic" onclick="iniciarTema('numeracion')"><div class="icon">🔢</div><span class="badge">Tema 1</span><h3>Numeración</h3></div><div class="card topic" onclick="iniciarTema('suma')"><div class="icon">➕➖</div><span class="badge">Tema 2</span><h3>Suma y Resta</h3></div><div class="card topic" onclick="iniciarTema('multi')"><div class="icon">✖️</div><span class="badge">Tema 3</span><h3>Multiplicación</h3></div><div class="card topic" onclick="iniciarTema('division')"><div class="icon">➗</div><span class="badge">Tema 4</span><h3>División</h3></div><div class="card topic" onclick="iniciarTema('graficos')"><div class="icon">📊</div><span class="badge">Tema 5</span><h3>Gráficos</h3></div></div></div>
+<div id="view-juego" class="hidden"><div class="card"><button class="btn btn-ghost" onclick="volverMenu()">⬅ Volver</button><h2 id="temaTitulo"></h2><div id="imgActividad" class="img-box"></div><div class="question" id="preguntaTexto"></div><div id="areaVisual"></div><div class="options" id="opciones"></div><div id="feedback" class="feedback"></div><button id="btnSiguiente" class="btn btn-primary hidden" onclick="siguientePregunta()">Siguiente ➡</button></div><div class="card" style="display:flex;justify-content:space-between"><span id="contadorPreg">1/5</span><span>⭐ <span id="scoreTema">0</span> pts</span></div></div>
+<div class="card footer">Mateaventura v2.0 - Con AudioContext y imágenes - HTML | CSS | JS | localStorage - Offline - Culpina 2026 - Yupay Pukllay</div>
+</div>
+<script>
+// SONIDOS OFFLINE - Sin mp3, funciona en Quipus
+let audioCtx;
+function initAudio(){ try{ if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){} }
+function playSound(tipo){
+ initAudio(); if(!audioCtx) return;
+ let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+ osc.connect(gain); gain.connect(audioCtx.destination);
+ if(tipo==='correcto'){ osc.type='sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.25); gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.4); }
+ else { osc.type='sawtooth'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime+0.4); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.4); }
+ osc.start(); osc.stop(audioCtx.currentTime+0.45);
+}
+
+const temas = {
+numeracion: { titulo: "Numeración y valor posicional", preguntas: [
+{q:"En 345, ¿cuántas centenas hay?", img:"3️⃣4️⃣5️⃣", ops:["3 centenas","4 centenas","5 centenas"], c:0, exp:"3 es centenas, 4 decenas, 5 unidades."},
+{q:"¿Cuál es el valor de 2 en 726?", img:"7️⃣2️⃣6️⃣", ops:["2 unidades","20 unidades","200"], c:1, exp:"Está en decenas: vale 20."},
+{q:"Ordena menor a mayor: 102, 99, 210", img:"📏", ops:["99, 102, 210","102, 99, 210","210, 102, 99"], c:0, exp:"99 < 102 < 210"},
+{q:"4 centenas +5 decenas +2 unidades =", img:"💯", ops:["452","425","542"], c:0, exp:"400+50+2=452"},
+{q:"Antes de 300 es:", img:"⏮️", ops:["299","301","310"], c:0, exp:"299 es antecesor."}
+]},
+suma: { titulo:"Suma y Resta", preguntas:[
+{q:"23 + 45 = ?", img:"➕", ops:["68","58","78"], c:0, exp:"23+45=68"},
+{q:"12-5=?", img:"➖", ops:["7","17","5"], c:0, exp:"12-5=7"},
+{q:"87-34=?", img:"🧮", ops:["53","43","63"], c:0, exp:"87-34=53"},
+{q:"15 niños +12 niñas =?", img:"👦👧", ops:["27","25","30"], c:0, exp:"15+12=27"},
+{q:"100-46=?", img:"💯", ops:["54","64","44"], c:0, exp:"100-46=54"}
+]},
+multi: { titulo:"Multiplicación inicial", preguntas:[
+{q:"2+2+2+2 es lo mismo que:", img:"✖️2️⃣", ops:["2x4=8","2x2=4","4+4=8"], c:0, exp:"Sumar 2 cuatro veces es 2x4"},
+{q:"3x5=?", img:"🍎🍎🍎", ops:["15","10","20"], c:0, exp:"3x5=15"},
+{q:"4 lápices x 3 cajas =", img:"✏️📦", ops:["12","7","10"], c:0, exp:"4x3=12"},
+{q:"6x2=?", img:"6️⃣✖️2️⃣", ops:["12","8","10"], c:0, exp:"6x2=12"},
+{q:"5x0=?", img:"0️⃣", ops:["0","5","50"], c:0, exp:"Todo por 0 es 0"}
+]},
+division: { titulo:"División - Repartos", preguntas:[
+{q:"12 galletas entre 3 niños =", img:"🍪👦👦👦", ops:["4","6","3"], c:0, exp:"12÷3=4"},
+{q:"15÷5=?", img:"➗", ops:["3","5","2"], c:0, exp:"15÷5=3"},
+{q:"20 lápices en 4 estuches =", img:"✏️✏️✏️✏️", ops:["5","4","6"], c:0, exp:"20÷4=5"},
+{q:"18÷2=?", img:"🍰➗", ops:["9","8","6"], c:0, exp:"18÷2=9"},
+{q:"10÷2 sobra:", img:"🎂", ops:["0, exacto","1","2"], c:0, exp:"10÷2=5 exacto"}
+]},
+graficos: { titulo:"Gráficos y lectura de datos", preguntas:[
+{q:"Manzanas 5, Plátanos 8, Naranjas 3. ¿Más hay?", img:"🍎🍌🍊", ops:["Plátanos","Manzanas","Naranjas"], c:0, exp:"Plátanos 8.", data:[5,8,3], labels:["Manz","Plat","Nar"]},
+{q:"Mismo gráfico, total frutas?", img:"🧺", ops:["16","15","18"], c:0, exp:"5+8+3=16", data:[5,8,3], labels:["Manz","Plat","Nar"]},
+{q:"Fútbol 6, Básquet 4, Voley 2. ¿Menos elegido?", img:"⚽🏀🏐", ops:["Voley","Fútbol","Básquet"], c:0, exp:"Voley 2.", data:[6,4,2], labels:["Fut","Bas","Vol"]},
+{q:"Fútbol 6, Básquet 4, Voley 2. ¿Total votos?", img:"📊", ops:["12","10","14"], c:0, exp:"6+4+2=12", data:[6,4,2], labels:["Fut","Bas","Vol"]},
+{q:"¿Qué ayuda a comparar rápido?", img:"📈", ops:["Gráfico de barras","Solo texto","Ninguno"], c:0, exp:"Gráfico de barras.", data:[4,2,1], labels:["A","B","C"]}
+]}
+};
+let estado = JSON.parse(localStorage.getItem('mateaventura_v2') || '{"nombre":"","puntaje":0,"avance":{},"temaActual":"","idx":0,"scoreTema":0}');
+function guardarEstado(){localStorage.setItem('mateaventura_v2', JSON.stringify(estado)); actualizarUI();}
+function guardarNombre(){let n=document.getElementById('inputNombre').value.trim(); if(!n){alert('Escribe tu nombre');return;} estado.nombre=n; initAudio(); guardarEstado(); mostrarMenu();}
+function skipLogin(){estado.nombre="Explorador"; initAudio(); guardarEstado(); mostrarMenu();}
+function mostrarMenu(){document.getElementById('view-login').classList.add('hidden');document.getElementById('view-juego').classList.add('hidden');document.getElementById('view-menu').classList.remove('hidden');document.getElementById('spanNombre').textContent=estado.nombre||"Explorador";actualizarUI();}
+function actualizarUI(){document.getElementById('totalScore').textContent=estado.puntaje;let c=Object.keys(estado.avance||{}).length;let pct=Math.round((c/5)*100);document.getElementById('progressFill').style.width=pct+"%";document.getElementById('progressText').textContent=`Progreso: ${pct}% (${c}/5 temas)`;}
+function iniciarTema(k){estado.temaActual=k;estado.idx=0;estado.scoreTema=0;guardarEstado();document.getElementById('view-menu').classList.add('hidden');document.getElementById('view-juego').classList.remove('hidden');document.getElementById('temaTitulo').textContent=temas[k].titulo;mostrarPregunta();}
+function mostrarPregunta(){let t=temas[estado.temaActual];let p=t.preguntas[estado.idx];document.getElementById('preguntaTexto').textContent=p.q;document.getElementById('imgActividad').textContent=p.img||"📚";document.getElementById('contadorPreg').textContent=`${estado.idx+1} / ${t.preguntas.length}`;document.getElementById('scoreTema').textContent=estado.scoreTema;let area=document.getElementById('areaVisual');area.innerHTML="";if(p.data){let wrap=document.createElement('div');wrap.className='chart-bar';let max=Math.max(...p.data);p.data.forEach((v,i)=>{let col=document.createElement('div');col.className='chart-col';col.style.height=(v/max*100)+"%";col.style.background=i==0?"#5b6ef5":i==1?"#6bcf7f":"#ffd93d";col.style.color=i==2?"#222":"#fff";col.innerHTML=`${v}<br><small>${p.labels[i]}</small>`;wrap.appendChild(col);});area.appendChild(wrap);}let opsDiv=document.getElementById('opciones');opsDiv.innerHTML="";p.ops.forEach((op,i)=>{let b=document.createElement('button');b.className='opt';b.textContent=op;b.onclick=()=>evaluar(i);opsDiv.appendChild(b);});document.getElementById('feedback').style.display='none';document.getElementById('btnSiguiente').classList.add('hidden');}
+function evaluar(i){let t=temas[estado.temaActual];let p=t.preguntas[estado.idx];let opts=document.querySelectorAll('.opt');let fb=document.getElementById('feedback');opts.forEach(o=>o.style.pointerEvents='none');if(i===p.c){opts[i].classList.add('correct');fb.className='feedback ok';fb.textContent="¡Correcto! 🎉 "+p.exp;fb.style.display='block';estado.scoreTema+=20;estado.puntaje+=20;playSound('correcto');}else{opts[i].classList.add('wrong');opts[p.c].classList.add('correct');fb.className='feedback bad';fb.textContent="Casi... "+p.exp;fb.style.display='block';playSound('error');}document.getElementById('btnSiguiente').classList.remove('hidden');guardarEstado();}
+function siguientePregunta(){let t=temas[estado.temaActual];if(estado.idx+1 < t.preguntas.length){estado.idx++;guardarEstado();mostrarPregunta();}else{estado.avance[estado.temaActual]=estado.scoreTema;guardarEstado();playSound('correcto');alert(`¡Terminaste ${t.titulo}! Puntaje: ${estado.scoreTema}/100 ⭐`);volverMenu();}}
+function volverMenu(){mostrarMenu();}
+function reiniciarProgreso(){if(confirm('¿Borrar progreso?')){localStorage.removeItem('mateaventura_v2');location.reload();}}
+if(estado.nombre){mostrarMenu();}
+</script>
+</body>
+</html>
